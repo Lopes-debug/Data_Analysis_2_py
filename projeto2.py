@@ -107,26 +107,26 @@ dfcopy['last_new_job'] = dfcopy['last_new_job'].astype(float)
 ## 0.3 - 0.5, strong predictor
 ## > 0.5, too good to be true
 
-objects = dfcopy.select_dtypes(include=['object']).columns.drop(['city','company_size'])
+objects = dfcopy.select_dtypes(include=['object']).columns.drop(['city','company_size']) #select columns of object type
 
-iv = []
+iv = []  
 
 for i in objects:
 
-    df_woe_iv = (pd.crosstab(df[i], df['target'], normalize='columns')
-    .assign(woe =lambda dfx: np.log(dfx[1] / dfx[0]))
-    .assign(iv = lambda dfx: np.sum(dfx['woe']* (dfx[1]-dfx[0]))))
+    df_woe_iv = (pd.crosstab(df[i], df['target'], normalize='columns')  #pd to create tabela cruzada com coluna df[i], coluna de referência df['target'], do tipo colunas (normalize='columns')
+    .assign(woe = lambda dfx: np.log(dfx[1] / dfx[0]))  #.assign cria nova coluna 'woe' que receberá o valor da função dfx. ao usar assign, automaticamente é fragmentado uma coluna do Df, em que será calculado a relação de proporção do valor da linha desta coluna com a classe categórica alvo 'target' (0 ou 1). E por final, np.log traz o resultado em logaritmo. isto feito para todas as linhas da coluna em questão.
+    .assign(iv = lambda dfx: np.sum(dfx['woe']* (dfx[1]-dfx[0])))) #mesma lógica anterior, alterando np.sum, multiplicação com o resultado de woe e subtrações
 
     print(df_woe_iv, '\n----------------------------')
 
-    iv.append(df_woe_iv['iv'][0]) 
+    iv.append(df_woe_iv['iv'][0]) #adiciona à lista vazia o primeiro valor da coluna 'iv' do df_woe_iv
 
-df_iv = pd.DataFrame({'Features':objects,'iv':iv}).set_index('Features').sort_values(by= 'iv')
+df_iv = pd.DataFrame({'Features':objects,'iv':iv}).set_index('Features').sort_values(by= 'iv') #create a Df and set index as 'Features' and sorting by 'iv'
 
 plt.figure(figsize=(9,9))
-df_iv.plot(kind='barh', title='Value Information of Categoric Variables', colormap='Accent')
-for index, value in enumerate(list(round(df_iv['iv'],3))):
-    plt.text((value), index, str(value))
-plt.legend(loc = 'lower right')
+df_iv.plot(kind='barh', title='Value Information of Categoric Variables', colormap='Accent') #plot graphic horizontal barr, defining color and title
+for index, value in enumerate(list(round(df_iv['iv'],3))): #defining value as df_iv['iv'] but transforming in list and rounding three decimal places. and separating index with enumerate
+    plt.text((value), index, str(value)) #this line use the index, value to position text (iv value) in bar graphic
+plt.legend(loc = 'lower right') #positioned legend in lower right 
 plt.show()
 #obs: pesquisar mais sobre woe e iv!!
