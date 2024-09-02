@@ -2,8 +2,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import missingno as msgn
 import scipy as sc
 from scipy.stats import normaltest
+
 
 
 df = pd.read_csv(r'C:\Users\leand\OneDrive\Documentos\FormacaoDSA\f_projeto2\Projeto2\dataset\aug_train.csv')
@@ -107,26 +109,50 @@ dfcopy['last_new_job'] = dfcopy['last_new_job'].astype(float)
 ## 0.3 - 0.5, strong predictor
 ## > 0.5, too good to be true
 
-objects = dfcopy.select_dtypes(include=['object']).columns.drop(['city','company_size']) #select columns of object type
+# objects = dfcopy.select_dtypes(include=['object']).columns.drop(['city','company_size']) #select columns of object type
 
-iv = []  
+# iv = []  
 
-for i in objects:
+# for i in objects:
 
-    df_woe_iv = (pd.crosstab(df[i], df['target'], normalize='columns')  #pd to create tabela cruzada com coluna df[i], coluna de referência df['target'], do tipo colunas (normalize='columns')
-    .assign(woe = lambda dfx: np.log(dfx[1] / dfx[0]))  #.assign cria nova coluna 'woe' que receberá o valor da função dfx. ao usar assign, automaticamente é fragmentado uma coluna do Df, em que será calculado a relação de proporção do valor da linha desta coluna com a classe categórica alvo 'target' (0 ou 1). E por final, np.log traz o resultado em logaritmo. isto feito para todas as linhas da coluna em questão.
-    .assign(iv = lambda dfx: np.sum(dfx['woe']* (dfx[1]-dfx[0])))) #mesma lógica anterior, alterando np.sum, multiplicação com o resultado de woe e subtrações
+#     df_woe_iv = (pd.crosstab(df[i], df['target'], normalize='columns')  #pd to create tabela cruzada com coluna df[i], coluna de referência df['target'], do tipo colunas (normalize='columns')
+#     .assign(woe = lambda dfx: np.log(dfx[1] / dfx[0]))  #.assign cria nova coluna 'woe' que receberá o valor da função dfx. ao usar assign, automaticamente é fragmentado uma coluna do Df, em que será calculado a relação de proporção do valor da linha desta coluna com a classe categórica alvo 'target' (0 ou 1). E por final, np.log traz o resultado em logaritmo. isto feito para todas as linhas da coluna em questão.
+#     .assign(iv = lambda dfx: np.sum(dfx['woe']* (dfx[1]-dfx[0])))) #mesma lógica anterior, alterando np.sum, multiplicação com o resultado de woe e subtrações
 
-    print(df_woe_iv, '\n----------------------------')
+#     print(df_woe_iv, '\n----------------------------')
 
-    iv.append(df_woe_iv['iv'][0]) #adiciona à lista vazia o primeiro valor da coluna 'iv' do df_woe_iv
+#     iv.append(df_woe_iv['iv'][0]) #adiciona à lista vazia o primeiro valor da coluna 'iv' do df_woe_iv
 
-df_iv = pd.DataFrame({'Features':objects,'iv':iv}).set_index('Features').sort_values(by= 'iv') #create a Df and set index as 'Features' and sorting by 'iv'
+# df_iv = pd.DataFrame({'Features':objects,'iv':iv}).set_index('Features').sort_values(by= 'iv') #create a Df and set index as 'Features' and sorting by 'iv'
 
-plt.figure(figsize=(9,9))
-df_iv.plot(kind='barh', title='Value Information of Categoric Variables', colormap='Accent') #plot graphic horizontal barr, defining color and title
-for index, value in enumerate(list(round(df_iv['iv'],3))): #defining value as df_iv['iv'] but transforming in list and rounding three decimal places. and separating index with enumerate
-    plt.text((value), index, str(value)) #this line use the index, value to position text (iv value) in bar graphic
-plt.legend(loc = 'lower right') #positioned legend in lower right 
-plt.show()
+# plt.figure(figsize=(9,9))
+# df_iv.plot(kind='barh', title='Value Information of Categoric Variables', colormap='Accent') #plot graphic horizontal barr, defining color and title
+# for index, value in enumerate(list(round(df_iv['iv'],3))): #defining value as df_iv['iv'] but transforming in list and rounding three decimal places. and separating index with enumerate
+#     plt.text((value), index, str(value)) #this line use the index, value to position text (iv value) in bar graphic
+# plt.legend(loc = 'lower right') #positioned legend in lower right 
+# plt.show()
 #obs: pesquisar mais sobre woe e iv!!
+
+
+## Data cleaning
+# pd.set_option('display.max_columns', None) #code line to config print to show all columns 
+dfcopy = dfcopy.drop(columns=['enrollee_id', 'city','gender', 'company_size', 'training_hours', 'last_new_job']) #remove some columns
+
+null_values = dfcopy.isna().sum() #to check if 'NaN' in df, sum all these values and reset index of the new columns of null values
+# plt.figure(figsize=(13,9)) #size plot
+
+# ax = sns.barplot(null_values, palette='husl') #barplot, acess first column of null values(there is only one), and color palette
+# plt.xlabel('Atributes',fontsize=12) #name for x axis
+# plt.ylabel('Counts of Missing Values', fontsize=15) #name for y axis
+# plt.title('Plot of Missing Values', fontsize=15) #title of graphic 
+
+# for p in ax.patches:
+#     ax.annotate(f'\n{p.get_height()}', (p.get_x()+0.4, (p.get_height())), ha='center', color='black', size=11) #highlight value of bar in top of the bar. get_x to take position x of the bar, get.height to take value of the bar
+# plt.show()
+
+
+## To visualizate and check if have default in result - Map of Missing Values
+
+null_values = pd.DataFrame(null_values)
+msgn.matrix(df[null_values[null_values[0]>0].index]) #analisando de dentro pra fora: df2[0]>0 refere à primeira coluna do df2 retorna uma série booleana True se valor > 0. df2[df2[0]>0] retorna um novo dataframe atualizado com a condição da série booleana estabelecida. e df1 será condicionado pelo novo df2 filtrado, onde permanecerá no df1 o mesmo que no df2. obs: preciso pausar e printar cada etapa para tirar dúvidas e consolidar conhecimento
+plt.show()    
