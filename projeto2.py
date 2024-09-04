@@ -138,7 +138,7 @@ dfcopy['last_new_job'] = dfcopy['last_new_job'].astype(float)
 # pd.set_option('display.max_columns', None) #code line to config print to show all columns 
 dfcopy = dfcopy.drop(columns=['enrollee_id', 'city','gender', 'company_size', 'training_hours', 'last_new_job']) #remove some columns
 
-null_values = dfcopy.isna().sum() #to check if 'NaN' in df, sum all these values and reset index of the new columns of null values
+null_values = dfcopy.isna().sum() #to check if missing values (nan) in df, sum all these values and reset index of the new columns of null values
 # plt.figure(figsize=(13,9)) #size plot
 
 # ax = sns.barplot(null_values, palette='husl') #barplot, acess first column of null values(there is only one), and color palette
@@ -154,5 +154,102 @@ null_values = dfcopy.isna().sum() #to check if 'NaN' in df, sum all these values
 ## To visualizate and check if have default in result - Map of Missing Values
 
 null_values = pd.DataFrame(null_values)
-msgn.matrix(df[null_values[null_values[0]>0].index]) #analisando de dentro pra fora: df2[0]>0 refere à primeira coluna do df2 retorna uma série booleana True se valor > 0. df2[df2[0]>0] retorna um novo dataframe atualizado com a condição da série booleana estabelecida. e df1 será condicionado pelo novo df2 filtrado, onde permanecerá no df1 o mesmo que no df2. obs: preciso pausar e printar cada etapa para tirar dúvidas e consolidar conhecimento
-plt.show()    
+
+# msgn.matrix(df[null_values[null_values[0]>0].index])  #analisando de dentro pra fora: df2[0]>0 refere à primeira coluna do df2 retorna uma série booleana True se valor > 0. df2[df2[0]>0] retorna um novo dataframe atualizado com a condição da série booleana estabelecida. e df1 será condicionado pelo novo df2 filtrado, onde permanecerá no df1 o mesmo que no df2. obs: preciso pausar e printar cada etapa para tirar dúvidas e consolidar conhecimento
+
+# plt.show()    
+
+## Result of columns to be cleaned:'enrolled_university', 'education_level', 'major_discipline', 'experience', 'company_type'
+
+##Cleaning Started:
+dfcopy = dfcopy.drop(['relevent_experience', 'city_development_index','target'], axis=1) #drop some columns
+
+## major_discipline:
+# sns.countplot(data=dfcopy.fillna('NaN'), x ='major_discipline', alpha=0.7, edgecolor='black') #plot the missing value counting of dfcopy['major_discipline'] 
+# plt.xticks(rotation=45)  #rotate name of columns in x axle
+# ax = plt.gca() #get current axes - return axes of graphs (labels(x,y), lines, title, subtitle(legenda))
+# # bound = ax.get_xbound() #return the limits of x axle in tuple form (xmin, xmax) 
+# for p in ax.patches:  #patches is a each bar in graph
+#     ax.annotate(f'\n{p.get_height()}', (p.get_x()+0.4, p.get_height()), ha='center', color='black', size=10)
+# plt.title('Missing Values of "major_discipline" Before Processing \n', fontsize = 15)
+# plt.show()
+
+## Proporção da coluna education com a coluna major (ambas tem interligação)
+# print('Total de Valores Ausentes da Coluna "major_discipline:"', dfcopy['major_discipline'].isna().sum(),'\n')
+# print('Relação dos Valores Ausentes e Variável "educantion_level":\n')
+# print(dfcopy[dfcopy['major_discipline'].isna()]['education_level'].value_counts(dropna=False)) #filter the dfcopy['education_level'] to get only row where dfcopy['major_discipline'] is equal 'NaN'(not a number) and the end count the values, including missing values of 'education_level'
+
+major_index = dfcopy[(dfcopy['major_discipline'].isna()) | (dfcopy['education_level']=='High School') | (dfcopy['education_level']=='Primary School') | (dfcopy['education_level'].isna())].index  #filter df with this conditions and save index of all this rows in variable to use after
+# print(len(major_index))
+
+dfcopy['major_discipline'][major_index] = 'Non Degree'  #change those rows values to 'Non Degree'
+dfcopy[dfcopy['major_discipline'].isna()] = 'Other' #change the rest of missing values to 'Other' group
+
+#To show the final graph 
+# plt.figure(figsize=(10,10))
+# ax = sns.countplot(data=dfcopy.fillna('NaN'), x = 'major_discipline', alpha=0.7, edgecolor='black')
+# plt.xticks(rotation=45)
+# for p in ax.patches:
+#     plt.annotate(f'\n{p.get_height()}', (p.get_x()+0.4, p.get_height()), ha='center', color='black', size=10)
+# plt.show()
+
+
+## enrolled_univesity:
+# print(dfcopy.head())
+# print(dfcopy['enrolled_university'].value_counts())
+
+# sns.countplot(data = dfcopy.fillna('NaN'), x = 'enrolled_university', alpha=0.7, edgecolor='black')
+# sns.despine()
+# plt.xticks()
+# ax = plt.gca()
+# bound = ax.get_xbound()
+# for p in ax.patches:
+#     ax.annotate(f'\n {p.get_height()}', (p.get_x()+0.4, p.get_height()), ha='center', color='black', size=10 )
+# plt.title('Missing Values of "enrolled_university" Before Processing \n', fontsize=15)
+# plt.show()
+
+# print('Total Missing Values of "enrolled_university":', dfcopy['enrolled_university'].isna().sum())
+# print('\n Relation of Missing Values and Column "education_level":')
+# print(dfcopy[dfcopy['enrolled_university'].isna()]['education_level'].value_counts())
+
+dfcopy['enrolled_university'].fillna('Other', inplace=True)
+# print(dfcopy['enrolled_university'].value_counts())
+
+
+## company_type:
+# print(dfcopy.head()) #to check if is ok
+
+# plt.figure(figsize=(50,50))
+# ax = sns.countplot(data=dfcopy.fillna('NaN'), x='company_type', color='blue', edgecolor='black')
+# plt.title('company_type', fontsize=15)
+# plt.xticks(rotation=45)
+# plt.legend('paitaon')
+# for p in ax.patches:
+#     ax.annotate(f'\n{p.get_height()}',(p.get_x()+0.4, p.get_height()), ha='center', color='black', size=10)
+# plt.show()
+
+# print(dfcopy['company_type'].value_counts(dropna=False))
+# dfcopy.fillna({'company_type':'Other'},inplace=True)  #another nice ways to change nan values of a columns: df[col] = df[col].method(value) or `df.loc[row_indexer, "col"] = values` 
+# print(dfcopy['company_type'].value_counts())
+
+
+## education_level:
+# print(dfcopy.head())
+
+# plt.figure(figsize=(20,20))
+# plt.title('education_level',fontsize=15)
+# ax = sns.countplot(data=dfcopy.fillna('NaN'),x='education_level', edgecolor='blue')
+# for p in ax.patches:
+#     ax.annotate(f'\n{p.get_height()}', (p.get_x()+0.4, p.get_height()), ha='center', fontsize=10, color='black')
+# plt.show()
+
+# print(dfcopy['education_level'].value_counts(dropna=False))
+edu= dfcopy[dfcopy['education_level'].isna()].index
+dfcopy['education_level'][edu]='Other'  #another nice way to change nan values of a columns: `df.loc[row_indexer, "col"] = values` 
+# print(dfcopy['education_level'].value_counts())
+
+
+## experience:
+print(dfcopy.head())
+
+
