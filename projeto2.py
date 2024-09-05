@@ -6,7 +6,7 @@ import missingno as msgn
 import scipy as sc
 from scipy.stats import normaltest
 
-
+## This is HR data. The goal is to find good candidates to hire in the company.
 
 df = pd.read_csv(r'C:\Users\leand\OneDrive\Documentos\FormacaoDSA\f_projeto2\Projeto2\dataset\aug_train.csv')
 
