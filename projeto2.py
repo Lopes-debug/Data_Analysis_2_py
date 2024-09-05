@@ -162,7 +162,7 @@ null_values = pd.DataFrame(null_values)
 ## Result of columns to be cleaned:'enrolled_university', 'education_level', 'major_discipline', 'experience', 'company_type'
 
 ##Cleaning Started:
-dfcopy = dfcopy.drop(['relevent_experience', 'city_development_index','target'], axis=1) #drop some columns
+# dfcopy = dfcopy.drop(['relevent_experience', 'city_development_index','target'], axis=1) #drop some columns
 
 ## major_discipline:
 # sns.countplot(data=dfcopy.fillna('NaN'), x ='major_discipline', alpha=0.7, edgecolor='black') #plot the missing value counting of dfcopy['major_discipline'] 
@@ -229,7 +229,7 @@ dfcopy['enrolled_university'].fillna('Other', inplace=True)
 # plt.show()
 
 # print(dfcopy['company_type'].value_counts(dropna=False))
-# dfcopy.fillna({'company_type':'Other'},inplace=True)  #another nice ways to change nan values of a columns: df[col] = df[col].method(value) or `df.loc[row_indexer, "col"] = values` 
+dfcopy.fillna({'company_type':'Other'},inplace=True)  #another nice ways to change nan values of a columns: df[col] = df[col].method(value) or `df.loc[row_indexer, "col"] = values` 
 # print(dfcopy['company_type'].value_counts())
 
 
@@ -250,6 +250,52 @@ dfcopy['education_level'][edu]='Other'  #another nice way to change nan values o
 
 
 ## experience:
+# print(dfcopy.head())
+
+# print(dfcopy['experience'].isna().sum())
+# print(f"{dfcopy.isna().sum() / len(dfcopy) * 100}")  #nan representa apenas 0.34% do total = descartável
+
+# dfcopy = dfcopy.dropna()
+
+# print(f"{dfcopy.isna().sum() / len(dfcopy) * 100}")  #todos os valores tratados
+
+## senso comum sobre valores ausentes na variável em relação ao DataFrame:
+##      >50% = descarta a variável
+##      <50% = tratável
+##      <2%  = descarta os valores ausentes
+## pesquisar video commit direto na main do repo github e praticar mais, pesquisar mais
+
+
+## Final Changes
+
+dfcopy['enrolled_university'] = dfcopy['enrolled_university'].replace('no_enrollment', 'No enrollment')
+
 print(dfcopy.head())
 
+x = dfcopy.drop(columns=['target'])
+y = dfcopy['target']
 
+
+## Final Report
+
+## Variables that are important in the analysis to identify a good candidate:
+## - length of profissional experience
+## - type of company where the professional works or has worked for
+## - if has or not relevant experience
+## - if enrolled in university or not
+## - undergraduate specialization
+## - development index of the city where candidate lives
+## - the education level
+
+## Variables that not are important in analysis to identify a good candidate:
+## - candidate ID
+## - the gender personal
+## - the code of candidate's city
+## - last time the candidate was employed
+## - the company size
+## - hours of training
+
+## Data Analyst Recommendations:
+## - RH can improve the method of searching for better data to maximize the quality and efficiency of the analysis.
+## - RH can be find a good candidate who seeks employment in the city that has a low development index, no relevant experience, high level of education and low professional experience.
+## - RH can make training more compact because the most people don't need time a lot pf time to complete the training, which will reduce the investiment and keep the focus on another more meaningful strategy
